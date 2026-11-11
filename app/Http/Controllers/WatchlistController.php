@@ -26,4 +26,12 @@ class WatchlistController extends Controller
 
         return redirect('/watchlist');
     }
+
+    public function markWatched(WatchlistItem $item): RedirectResponse
+    {
+        $item->watched = true;
+        $item->save();
+
+        return redirect('/watchlist');
+    }
 }
