@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\WatchlistItem;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,10 +28,14 @@ class WatchlistController extends Controller
         return redirect('/watchlist');
     }
 
-    public function markWatched(WatchlistItem $item): RedirectResponse
+    public function markWatched(Request $request, WatchlistItem $item): RedirectResponse|JsonResponse
     {
         $item->watched = true;
         $item->save();
+
+        if ($request->expectsJson()) {
+            return response()->json(['watched' => $item->watched]);
+        }
 
         return redirect('/watchlist');
     }
