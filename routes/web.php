@@ -8,3 +8,4 @@ Route::get('/', function () {
 });
 
 Route::get('/watchlist', [WatchlistController::class, 'index']);
+Route::post('/watchlist', [WatchlistController::class, 'store'])->name('watchlist.store');

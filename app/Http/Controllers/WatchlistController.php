@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\WatchlistItem;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class WatchlistController extends Controller
@@ -12,5 +14,16 @@ class WatchlistController extends Controller
         $items = WatchlistItem::latest()->get();
 
         return view('watchlist.index', ['items' => $items]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+        ]);
+
+        WatchlistItem::create($validated);
+
+        return redirect('/watchlist');
     }
 }
