@@ -120,7 +120,11 @@ function createWatchOptions(film) {
                 }
 
                 const credit = document.createElement('p');
-                credit.append('Availability data from ', createLink('JustWatch', 'https://www.justwatch.com/uk'), '.');
+                credit.append(
+                    'Availability data from ',
+                    createLink('JustWatch', 'https://www.justwatch.com/uk'),
+                    '.',
+                );
                 details.append(credit);
 
                 status.textContent = 'UK watch options loaded.';
@@ -176,7 +180,16 @@ function createFilmRow(film, selectedMatchForm) {
         }
     });
 
-    row.append(title, actionButton, createWatchOptions(film));
+    const cinemaPanel = createCinemaShowtimes(film, {
+        editions: new URL(`${encodeURIComponent(film.id)}/cinema-editions`, searchForm.action),
+        showtimes: (editionId) => new URL(
+            `../cinemas/showtimes/${encodeURIComponent(editionId)}`,
+            searchForm.action,
+        ),
+    });
+    cinemaPanel.style.flexBasis = '100%';
+
+    row.append(title, actionButton, createWatchOptions(film), cinemaPanel);
     return row;
 }
 
