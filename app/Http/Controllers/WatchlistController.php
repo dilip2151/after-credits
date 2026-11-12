@@ -39,4 +39,11 @@ class WatchlistController extends Controller
 
         return redirect('/watchlist');
     }
+
+    public function destroy(WatchlistItem $item): RedirectResponse
+    {
+        $item->delete();
+
+        return redirect('/watchlist');
+    }
 }

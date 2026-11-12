@@ -15,6 +15,9 @@ Route::post('/watchlist', [WatchlistController::class, 'store'])
 Route::patch('/watchlist/{item}/watched', [WatchlistController::class, 'markWatched'])
     ->name('watchlist.mark-watched');
 
+Route::delete('/watchlist/{item}', [WatchlistController::class, 'destroy'])
+    ->name('watchlist.destroy');
+
 Route::get('/movies/search', [MovieSearchController::class, 'search'])
     ->name('movies.search');
 

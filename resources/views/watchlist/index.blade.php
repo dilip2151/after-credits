@@ -98,19 +98,32 @@
                                 </span>
                             </div>
 
-                            @unless ($item->watched)
+                            <div style="display: grid; gap: 0.5rem;">
+                                @unless ($item->watched)
+                                    <form method="POST"
+                                          action="{{ route('watchlist.mark-watched', ['item' => $item->id]) }}"
+                                          data-mark-watched>
+                                        @csrf
+                                        @method('PATCH')
+                                        <button class="secondary" type="submit"
+                                                aria-label="Mark as watched: {{ $item->title }}">
+                                            Mark as watched
+                                        </button>
+                                        <p class="error" role="alert" data-watch-error></p>
+                                    </form>
+                                @endunless
+
                                 <form method="POST"
-                                      action="{{ route('watchlist.mark-watched', ['item' => $item->id]) }}"
-                                      data-mark-watched>
+                                      action="{{ route('watchlist.destroy', ['item' => $item->id]) }}"
+                                      data-remove-film="{{ $item->title }}">
                                     @csrf
-                                    @method('PATCH')
+                                    @method('DELETE')
                                     <button class="secondary" type="submit"
-                                            aria-label="Mark as watched: {{ $item->title }}">
-                                        Mark as watched
+                                            aria-label="Remove {{ $item->title }} from watchlist">
+                                        Remove
                                     </button>
-                                    <p class="error" role="alert" data-watch-error></p>
                                 </form>
-                            @endunless
+                            </div>
                         </li>
                     @endforeach
                 </ul>
@@ -121,6 +134,16 @@
     <script>
         const watchedCount = document.querySelector('#watched-count');
         const unwatchedCount = document.querySelector('#unwatched-count');
+
+        document.querySelectorAll('[data-remove-film]').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                const title = form.dataset.removeFilm;
+
+                if (!window.confirm(`Remove "${title}" from your watchlist?`)) {
+                    event.preventDefault();
+                }
+            });
+        });
 
         document.querySelectorAll('[data-mark-watched]').forEach((form) => {
             form.addEventListener('submit', async (event) => {
