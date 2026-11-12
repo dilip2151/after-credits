@@ -16,13 +16,13 @@
     <header class="site-header">
         <div class="container">
             <nav aria-label="Main navigation"
-                 style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;">
-                <a class="brand" href="{{ url('/watchlist') }}">
+                 style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
+                <a class="brand" href="{{ url('/watchlist') }}" style="margin-inline-end: auto;">
                     <span class="brand-mark" aria-hidden="true">▶</span>
                     After Credits
                 </a>
-
                 <a href="{{ route('cinemas.index') }}">Cinema Finder</a>
+                <a href="{{ route('credits.index') }}">Credits</a>
             </nav>
         </div>
     </header>
