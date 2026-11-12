@@ -167,6 +167,26 @@ function createCinemaShowtimes(film, endpoints) {
         }
     }
 
+    function addCinemaMapLink(row, cinema) {
+        const { lat, lng } = cinema;
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)
+            || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+            return;
+        }
+
+        const url = new URL('https://www.openstreetmap.org/');
+        url.searchParams.set('mlat', lat);
+        url.searchParams.set('mlon', lng);
+        url.hash = `map=17/${lat}/${lng}`;
+
+        const mapLink = document.createElement('a');
+        mapLink.href = url.href;
+        mapLink.textContent = 'View cinema on map';
+        mapLink.setAttribute('aria-label', `View cinema on map: ${cinema.cinema_name}`);
+        row.append(mapLink);
+    }
+
     showtimesButton.addEventListener('click', async () => {
         if (!location || !dateInput.reportValidity()) {
             return;
@@ -211,6 +231,7 @@ function createCinemaShowtimes(film, endpoints) {
 
                 if (screenings.childElementCount > 0) {
                     row.append(screenings);
+                    addCinemaMapLink(row, cinema);
                     results.append(row);
                 }
             }
