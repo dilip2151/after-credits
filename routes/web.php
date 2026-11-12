@@ -5,9 +5,7 @@ use App\Http\Controllers\MovieSearchController;
 use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/watchlist');
 
 Route::get('/watchlist', [WatchlistController::class, 'index']);
 
@@ -24,3 +22,5 @@ Route::view('/cinemas', 'cinemas')->name('cinemas.index');
 
 Route::get('/cinemas/search', [CinemaSearchController::class, 'search'])
     ->name('cinemas.search');
+
+Route::view('/credits', 'credits')->name('credits.index');
