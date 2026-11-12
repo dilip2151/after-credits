@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My watchlist | After Credits</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <script src="{{ asset('js/movie-search.js') }}" defer></script>
 </head>
 <body>
     @php
@@ -77,111 +78,42 @@
                 @enderror
             </form>
 
-            @forelse ($items as $item)
-                @if ($loop->first)
-                    <ul class="film-list" role="list">
-                @endif
-
-                <li class="film-row">
-                    <div class="film-details">
-                        <h3>{{ $item->title }}</h3>
-                        <span class="status" data-watch-status
-                              data-watched="{{ $item->watched ? 'true' : 'false' }}"
-                              tabindex="-1">
-                            {{ $item->watched ? 'Watched' : 'Unwatched' }}
-                        </span>
-                    </div>
-
-                    @unless ($item->watched)
-                        <form method="POST"
-                              action="{{ route('watchlist.mark-watched', ['item' => $item->id]) }}"
-                              data-mark-watched>
-                            @csrf
-                            @method('PATCH')
-                            <button class="secondary" type="submit"
-                                    aria-label="Mark as watched: {{ $item->title }}">
-                                Mark as watched
-                            </button>
-                            <p class="error" role="alert" data-watch-error></p>
-                        </form>
-                    @endunless
-                </li>
-
-                @if ($loop->last)
-                    </ul>
-                @endif
-            @empty
+            @if ($items->isEmpty())
                 <p class="empty-state">Your watchlist is empty. Add a film to get started.</p>
-            @endforelse
+            @else
+                <ul class="film-list" role="list">
+                    @foreach ($items as $item)
+                        <li class="film-row">
+                            <div class="film-details">
+                                <h3>{{ $item->title }}</h3>
+                                <span class="status" data-watch-status
+                                      data-watched="{{ $item->watched ? 'true' : 'false' }}"
+                                      tabindex="-1">
+                                    {{ $item->watched ? 'Watched' : 'Unwatched' }}
+                                </span>
+                            </div>
+
+                            @unless ($item->watched)
+                                <form method="POST"
+                                      action="{{ route('watchlist.mark-watched', ['item' => $item->id]) }}"
+                                      data-mark-watched>
+                                    @csrf
+                                    @method('PATCH')
+                                    <button class="secondary" type="submit"
+                                            aria-label="Mark as watched: {{ $item->title }}">
+                                        Mark as watched
+                                    </button>
+                                    <p class="error" role="alert" data-watch-error></p>
+                                </form>
+                            @endunless
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </section>
     </main>
 
     <script>
-        const searchForm = document.querySelector('#film-search-form');
-        const searchInput = document.querySelector('#film-query');
-        const searchButton = searchForm.querySelector('button[type="submit"]');
-        const searchStatus = document.querySelector('#film-search-status');
-        const searchResults = document.querySelector('#film-search-results');
-
-        searchForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            if (searchButton.disabled) {
-                return;
-            }
-
-            const query = searchInput.value.trim();
-            searchResults.replaceChildren();
-
-            if (query.length < 2) {
-                searchStatus.textContent = 'Enter at least two characters.';
-                return;
-            }
-
-            const url = new URL(searchForm.action);
-            url.searchParams.set('query', query);
-
-            searchButton.disabled = true;
-            searchStatus.textContent = 'Searching for films…';
-
-            try {
-                const response = await fetch(url, {
-                    headers: { Accept: 'application/json' },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Film search failed');
-                }
-
-                const { results } = await response.json();
-
-                if (!Array.isArray(results)) {
-                    throw new Error('Unexpected search response');
-                }
-
-                for (const film of results) {
-                    const row = document.createElement('li');
-                    row.className = 'film-row';
-
-                    const title = document.createElement('strong');
-                    const year = film.release_date?.slice(0, 4);
-                    title.textContent = year ? `${film.title} (${year})` : film.title;
-
-                    row.append(title);
-                    searchResults.append(row);
-                }
-
-                searchStatus.textContent = results.length === 0
-                    ? 'No films found. Try a different title.'
-                    : `${results.length} ${results.length === 1 ? 'match' : 'matches'} shown.`;
-            } catch {
-                searchResults.replaceChildren();
-                searchStatus.textContent = 'Film search is unavailable right now. Please try again.';
-            } finally {
-                searchButton.disabled = false;
-            }
-        });
-
         const watchedCount = document.querySelector('#watched-count');
         const unwatchedCount = document.querySelector('#unwatched-count');
 
@@ -192,6 +124,10 @@
                 const button = form.querySelector('button');
                 const status = form.closest('li').querySelector('[data-watch-status]');
                 const errorMessage = form.querySelector('[data-watch-error]');
+
+                if (button.disabled) {
+                    return;
+                }
 
                 button.disabled = true;
                 errorMessage.textContent = '';
