@@ -15,10 +15,15 @@
 
     <header class="site-header">
         <div class="container">
-            <a class="brand" href="{{ url('/watchlist') }}">
-                <span class="brand-mark" aria-hidden="true">▶</span>
-                After Credits
-            </a>
+            <nav aria-label="Main navigation"
+                 style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;">
+                <a class="brand" href="{{ url('/watchlist') }}">
+                    <span class="brand-mark" aria-hidden="true">▶</span>
+                    After Credits
+                </a>
+
+                <a href="{{ route('cinemas.index') }}">Cinema Finder</a>
+            </nav>
         </div>
     </header>
 
