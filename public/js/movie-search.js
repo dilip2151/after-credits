@@ -11,6 +11,26 @@ const cancelMatchButton = document.querySelector('#cancel-film-match');
 let matchForm = null;
 let activeSearch = null;
 
+function createLink(label, url) {
+    const link = document.createElement('a');
+    link.textContent = label;
+    link.href = url;
+    return link;
+}
+
+function getHttpsUrl(value) {
+    if (typeof value !== 'string') {
+        return null;
+    }
+
+    try {
+        const url = new URL(value);
+        return url.protocol === 'https:' ? url.href : null;
+    } catch {
+        return null;
+    }
+}
+
 function createWatchOptions(film) {
     const details = document.createElement('details');
     const summary = document.createElement('summary');
@@ -53,33 +73,56 @@ function createWatchOptions(film) {
                 ['Rent', providers.rent],
                 ['Buy', providers.buy],
             ];
-
             const options = document.createElement('dl');
+            const websites = providers.websites ?? {};
 
             for (const [label, names] of categories) {
-                if (names.length === 0) {
+                if (!Array.isArray(names) || names.length === 0) {
                     continue;
                 }
 
                 const heading = document.createElement('dt');
                 heading.textContent = label;
 
-                const list = document.createElement('dd');
-                list.textContent = names.join(', ');
+                const group = document.createElement('dd');
+                const list = document.createElement('ul');
+                list.className = 'film-list';
+                list.setAttribute('role', 'list');
 
-                options.append(heading, list);
+                for (const name of names) {
+                    const item = document.createElement('li');
+                    const website = getHttpsUrl(websites[name]);
+
+                    if (website) {
+                        item.append(createLink(name, website));
+                    } else {
+                        item.textContent = name;
+                    }
+
+                    list.append(item);
+                }
+
+                group.append(list);
+                options.append(heading, group);
             }
 
             if (options.childElementCount === 0) {
                 status.textContent = 'No UK subscription, rental, or purchase options listed.';
             } else {
-                const credit = document.createElement('p');
-                const link = document.createElement('a');
-                link.href = 'https://www.justwatch.com/uk';
-                link.textContent = 'JustWatch';
-                credit.append('Availability data from ', link, '.');
+                details.append(options);
 
-                details.append(options, credit);
+                const listingsUrl = getHttpsUrl(providers.link);
+
+                if (listingsUrl) {
+                    const listings = document.createElement('p');
+                    listings.append(createLink(`View all UK listings for ${film.title}`, listingsUrl));
+                    details.append(listings);
+                }
+
+                const credit = document.createElement('p');
+                credit.append('Availability data from ', createLink('JustWatch', 'https://www.justwatch.com/uk'), '.');
+                details.append(credit);
+
                 status.textContent = 'UK watch options loaded.';
             }
 
@@ -134,7 +177,6 @@ function createFilmRow(film, selectedMatchForm) {
     });
 
     row.append(title, actionButton, createWatchOptions(film));
-
     return row;
 }
 

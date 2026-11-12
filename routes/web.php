@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CinemaSearchController;
+use App\Http\Controllers\CinemaShowtimesController;
 use App\Http\Controllers\MovieSearchController;
 use App\Http\Controllers\MovieWatchProvidersController;
 use App\Http\Controllers\WatchlistController;
@@ -34,5 +35,9 @@ Route::view('/cinemas', 'cinemas')->name('cinemas.index');
 
 Route::get('/cinemas/search', [CinemaSearchController::class, 'search'])
     ->name('cinemas.search');
+
+Route::get('/cinemas/showtimes/{film}', [CinemaShowtimesController::class, 'show'])
+    ->whereNumber('film')
+    ->name('cinemas.showtimes');
 
 Route::view('/credits', 'credits')->name('credits.index');
