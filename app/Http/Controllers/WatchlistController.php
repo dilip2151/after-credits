@@ -41,6 +41,18 @@ class WatchlistController extends Controller
         return redirect('/watchlist');
     }
 
+    public function matchFilm(Request $request, WatchlistItem $item): RedirectResponse
+    {
+        $validated = $request->validate([
+            'tmdb_id' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $item->tmdb_id = $validated['tmdb_id'];
+        $item->save();
+
+        return redirect('/watchlist');
+    }
+
     public function destroy(WatchlistItem $item): RedirectResponse
     {
         $item->delete();

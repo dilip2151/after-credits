@@ -61,6 +61,11 @@
                 </div>
             </form>
 
+            <div id="film-match-controls" hidden>
+                <p id="film-match-status" role="status"></p>
+                <button id="cancel-film-match" class="secondary" type="button">Cancel matching</button>
+            </div>
+
             <p id="film-search-status" role="status"></p>
             <ul id="film-search-results" class="film-list" role="list"></ul>
         </section>
@@ -82,6 +87,10 @@
                     <p id="title-error" class="error">{{ $message }}</p>
                 @enderror
             </form>
+
+            @error('tmdb_id')
+                <p class="error" role="alert">{{ $message }}</p>
+            @enderror
 
             @if ($items->isEmpty())
                 <p class="empty-state">Your watchlist is empty. Add a film to get started.</p>
@@ -123,7 +132,30 @@
                                         Remove
                                     </button>
                                 </form>
+
+                                @unless ($item->tmdb_id)
+                                    <form method="POST"
+                                          action="{{ route('watchlist.match', ['item' => $item->id]) }}"
+                                          data-match-film="{{ $item->title }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="tmdb_id" value="">
+                                        <button class="secondary" type="button" data-start-film-match hidden
+                                                aria-label="Match film: {{ $item->title }}">
+                                            Match film
+                                        </button>
+                                    </form>
+                                @endunless
                             </div>
+
+                            @if ($item->tmdb_id)
+                                <div data-saved-watch-options
+                                     data-tmdb-id="{{ $item->tmdb_id }}"
+                                     data-film-title="{{ $item->title }}"
+                                     style="flex-basis: 100%;"></div>
+                            @else
+                                <a href="#film-query">Find watch options for {{ $item->title }} in film search</a>
+                            @endif
                         </li>
                     @endforeach
                 </ul>
@@ -132,6 +164,17 @@
     </main>
 
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-saved-watch-options]').forEach((container) => {
+                const film = {
+                    id: container.dataset.tmdbId,
+                    title: container.dataset.filmTitle,
+                };
+
+                container.append(createWatchOptions(film));
+            });
+        });
+
         const watchedCount = document.querySelector('#watched-count');
         const unwatchedCount = document.querySelector('#unwatched-count');
 

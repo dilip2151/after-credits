@@ -4,12 +4,17 @@ const searchButton = searchForm.querySelector('button[type="submit"]');
 const searchStatus = document.querySelector('#film-search-status');
 const searchResults = document.querySelector('#film-search-results');
 const watchlistInput = document.querySelector('#title');
+const matchControls = document.querySelector('#film-match-controls');
+const matchStatus = document.querySelector('#film-match-status');
+const cancelMatchButton = document.querySelector('#cancel-film-match');
+
+let matchForm = null;
+let activeSearch = null;
 
 function createWatchOptions(film) {
     const details = document.createElement('details');
     const summary = document.createElement('summary');
     const status = document.createElement('p');
-    const content = document.createElement('div');
 
     summary.textContent = 'Where to watch in the UK';
     summary.setAttribute('aria-label', `Where to watch ${film.title} in the UK`);
@@ -19,7 +24,7 @@ function createWatchOptions(film) {
     status.setAttribute('role', 'status');
 
     details.style.flexBasis = '100%';
-    details.append(summary, status, content);
+    details.append(summary, status);
 
     let loading = false;
     let loaded = false;
@@ -48,6 +53,7 @@ function createWatchOptions(film) {
                 ['Rent', providers.rent],
                 ['Buy', providers.buy],
             ];
+
             const options = document.createElement('dl');
 
             for (const [label, names] of categories) {
@@ -73,7 +79,7 @@ function createWatchOptions(film) {
                 link.textContent = 'JustWatch';
                 credit.append('Availability data from ', link, '.');
 
-                content.append(options, credit);
+                details.append(options, credit);
                 status.textContent = 'UK watch options loaded.';
             }
 
@@ -88,7 +94,7 @@ function createWatchOptions(film) {
     return details;
 }
 
-function createFilmRow(film) {
+function createFilmRow(film, selectedMatchForm) {
     const row = document.createElement('li');
     row.className = 'film-row';
 
@@ -96,13 +102,21 @@ function createFilmRow(film) {
     const year = film.release_date?.slice(0, 4);
     title.textContent = year ? `${film.title} (${year})` : film.title;
 
-    const addButton = document.createElement('button');
-    addButton.type = 'button';
-    addButton.className = 'secondary';
-    addButton.textContent = 'Add to watchlist';
-    addButton.setAttribute('aria-label', `Add ${title.textContent} to watchlist`);
+    const actionButton = document.createElement('button');
+    actionButton.type = 'button';
+    actionButton.className = 'secondary';
+    actionButton.textContent = selectedMatchForm ? 'Use this match' : 'Add to watchlist';
+    actionButton.setAttribute('aria-label', selectedMatchForm
+        ? `Match ${selectedMatchForm.dataset.matchFilm} to ${title.textContent}`
+        : `Add ${title.textContent} to watchlist`);
 
-    addButton.addEventListener('click', () => {
+    actionButton.addEventListener('click', () => {
+        if (selectedMatchForm) {
+            selectedMatchForm.elements.namedItem('tmdb_id').value = String(film.id);
+            selectedMatchForm.requestSubmit();
+            return;
+        }
+
         const watchlistForm = watchlistInput.form;
         watchlistInput.value = film.title;
 
@@ -110,7 +124,6 @@ function createFilmRow(film) {
         movieId.type = 'hidden';
         movieId.name = 'tmdb_id';
         movieId.value = String(film.id);
-
         watchlistForm.append(movieId);
 
         try {
@@ -120,25 +133,33 @@ function createFilmRow(film) {
         }
     });
 
-    row.append(title, addButton, createWatchOptions(film));
+    row.append(title, actionButton, createWatchOptions(film));
 
     return row;
 }
 
+function clearSearch() {
+    activeSearch?.abort();
+    activeSearch = null;
+    searchButton.disabled = false;
+    searchResults.replaceChildren();
+    searchStatus.textContent = '';
+}
+
 searchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-
-    if (searchButton.disabled) {
-        return;
-    }
+    clearSearch();
 
     const query = searchInput.value.trim();
-    searchResults.replaceChildren();
 
     if (query.length < 2) {
         searchStatus.textContent = 'Enter at least two characters.';
         return;
     }
+
+    const request = new AbortController();
+    const selectedMatchForm = matchForm;
+    activeSearch = request;
 
     const url = new URL(searchForm.action);
     url.searchParams.set('query', query);
@@ -149,6 +170,7 @@ searchForm.addEventListener('submit', async (event) => {
     try {
         const response = await fetch(url, {
             headers: { Accept: 'application/json' },
+            signal: request.signal,
         });
 
         if (!response.ok) {
@@ -157,21 +179,59 @@ searchForm.addEventListener('submit', async (event) => {
 
         const { results } = await response.json();
 
+        if (activeSearch !== request) {
+            return;
+        }
+
         if (!Array.isArray(results)) {
             throw new Error('Unexpected search response');
         }
 
         for (const film of results) {
-            searchResults.append(createFilmRow(film));
+            searchResults.append(createFilmRow(film, selectedMatchForm));
         }
 
         searchStatus.textContent = results.length === 0
             ? 'No films found. Try a different title.'
             : `${results.length} ${results.length === 1 ? 'match' : 'matches'} shown.`;
     } catch {
-        searchResults.replaceChildren();
-        searchStatus.textContent = 'Film search is unavailable right now. Please try again.';
+        if (activeSearch === request) {
+            searchResults.replaceChildren();
+            searchStatus.textContent = 'Film search is unavailable right now. Please try again.';
+        }
     } finally {
-        searchButton.disabled = false;
+        if (activeSearch === request) {
+            activeSearch = null;
+            searchButton.disabled = false;
+        }
     }
+});
+
+document.querySelectorAll('[data-start-film-match]').forEach((button) => {
+    button.addEventListener('click', () => {
+        clearSearch();
+
+        matchForm = button.form;
+        matchControls.hidden = false;
+        matchStatus.textContent = `Matching “${matchForm.dataset.matchFilm}”. Choose the correct title and year.`;
+
+        searchInput.value = matchForm.dataset.matchFilm.slice(0, 100);
+        searchInput.focus();
+
+        if (searchInput.value.trim().length >= 2) {
+            searchForm.requestSubmit();
+        }
+    });
+
+    button.hidden = false;
+});
+
+cancelMatchButton.addEventListener('click', () => {
+    const startButton = matchForm?.querySelector('[data-start-film-match]');
+
+    clearSearch();
+    matchForm = null;
+    matchControls.hidden = true;
+    matchStatus.textContent = '';
+    startButton?.focus();
 });
