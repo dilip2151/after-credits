@@ -14,15 +14,16 @@
     </header>
 
     <main class="container">
-        <section class="collection" aria-labelledby="cinema-title">
+        <section class="collection" aria-labelledby="cinema-title"
+                 data-search-url="{{ route('cinemas.search', [], false) }}">
             <h1 id="cinema-title">Find nearby cinemas</h1>
-            <p>Search selected Birmingham cinemas within 10 km of your approximate location.
-                Distances are measured in a straight line.</p>
+            <p>Search selected Birmingham cinemas within 10 km of your approximate location
+                or Birmingham city centre. Distances are measured in a straight line.</p>
 
-            <button id="use-location" type="button"
-                    data-search-url="{{ route('cinemas.search', [], false) }}">
-                Use my location
-            </button>
+            <p><button id="use-location" type="button">Use my location</button></p>
+            <p><button id="use-birmingham" class="secondary" type="button">
+                Search from Birmingham city centre
+            </button></p>
 
             <p id="location-status" role="status"></p>
             <ul id="cinema-results" class="film-list" role="list"></ul>
@@ -33,71 +34,89 @@
     </main>
 
     <script>
+        const cinemaSection = document.querySelector('[data-search-url]');
         const locationButton = document.querySelector('#use-location');
+        const birminghamButton = document.querySelector('#use-birmingham');
         const locationStatus = document.querySelector('#location-status');
         const cinemaResults = document.querySelector('#cinema-results');
+
+        function setSearchBusy(busy) {
+            locationButton.disabled = busy;
+            birminghamButton.disabled = busy;
+        }
+
+        async function searchCinemas(latitude, longitude, originLabel) {
+            setSearchBusy(true);
+            cinemaResults.replaceChildren();
+            locationStatus.textContent = `Looking for cinemas near ${originLabel}…`;
+
+            const url = new URL(cinemaSection.dataset.searchUrl, window.location.origin);
+            url.searchParams.set('latitude', latitude.toFixed(3));
+            url.searchParams.set('longitude', longitude.toFixed(3));
+
+            try {
+                const response = await fetch(url, {
+                    headers: { Accept: 'application/json' },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Cinema search failed');
+                }
+
+                const { results } = await response.json();
+
+                for (const cinema of results) {
+                    const row = document.createElement('li');
+                    row.className = 'film-row';
+
+                    const name = document.createElement('strong');
+                    name.textContent = `${cinema.name} (${cinema.distance_km} km)`;
+
+                    const mapLink = document.createElement('a');
+                    mapLink.href = cinema.map_url;
+                    mapLink.textContent = 'View on map';
+                    mapLink.setAttribute('aria-label', `View on map: ${cinema.name}`);
+
+                    row.append(name, mapLink);
+                    cinemaResults.append(row);
+                }
+
+                const count = results.length;
+                locationStatus.textContent = count === 0
+                    ? `No cinemas in our directory are within 10 km of ${originLabel}.`
+                    : `${count} ${count === 1 ? 'cinema' : 'cinemas'} within 10 km of ${originLabel}.`;
+            } catch {
+                cinemaResults.replaceChildren();
+                locationStatus.textContent = 'Cinema search is unavailable right now. Please try again.';
+            } finally {
+                setSearchBusy(false);
+            }
+        }
+
+        birminghamButton.addEventListener('click', () => {
+            searchCinemas(52.486, -1.890, 'Birmingham city centre');
+        });
 
         locationButton.addEventListener('click', () => {
             cinemaResults.replaceChildren();
 
             if (!navigator.geolocation) {
-                locationStatus.textContent = 'Location access is unavailable in this browser.';
+                locationStatus.textContent = 'Location access is unavailable. You can search from Birmingham city centre.';
                 return;
             }
 
-            locationButton.disabled = true;
+            setSearchBusy(true);
             locationStatus.textContent = 'Finding your location…';
 
             navigator.geolocation.getCurrentPosition(
-                async ({ coords }) => {
-                    locationStatus.textContent = 'Looking for nearby cinemas…';
-
-                    const url = new URL(locationButton.dataset.searchUrl, window.location.origin);
-                    url.searchParams.set('latitude', coords.latitude.toFixed(3));
-                    url.searchParams.set('longitude', coords.longitude.toFixed(3));
-
-                    try {
-                        const response = await fetch(url, {
-                            headers: { Accept: 'application/json' },
-                        });
-
-                        if (!response.ok) {
-                            throw new Error('Cinema search failed');
-                        }
-
-                        const { results } = await response.json();
-
-                        for (const cinema of results) {
-                            const row = document.createElement('li');
-                            row.className = 'film-row';
-
-                            const name = document.createElement('strong');
-                            name.textContent = `${cinema.name} (${cinema.distance_km} km)`;
-
-                            const mapLink = document.createElement('a');
-                            mapLink.href = cinema.map_url;
-                            mapLink.textContent = 'View on map';
-                            mapLink.setAttribute('aria-label', `View on map: ${cinema.name}`);
-
-                            row.append(name, mapLink);
-                            cinemaResults.append(row);
-                        }
-
-                        locationStatus.textContent = results.length === 0
-                            ? 'No cinemas in our Birmingham directory are within 10 km of your location.'
-                            : `${results.length} ${results.length === 1 ? 'cinema found' : 'cinemas found'}.`;
-                    } catch {
-                        cinemaResults.replaceChildren();
-                        locationStatus.textContent = 'Cinema search is unavailable right now. Please try again.';
-                    } finally {
-                        locationButton.disabled = false;
-                    }
+                ({ coords }) => {
+                    searchCinemas(coords.latitude, coords.longitude, 'your location');
                 },
                 (error) => {
                     locationStatus.textContent = error.code === 1
-                        ? 'Location permission was denied. You can allow it in your browser settings and try again.'
-                        : 'Your location could not be detected. Please try again.';
-                    locationButton.disabled = false;
+                        ? 'Location permission was denied. You can search from Birmingham city centre.'
+                        : 'Your location could not be detected. Try again or search from Birmingham city centre.';
+                    setSearchBusy(false);
                 },
                 { timeout: 10000 }
             );
