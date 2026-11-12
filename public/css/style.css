@@ -1,0 +1,336 @@
+:root {
+    color-scheme: light;
+    --paper: #f8f3e9;
+    --surface: #fffcf6;
+    --ink: #2d2024;
+    --muted: #68565a;
+    --burgundy: #772637;
+    --burgundy-dark: #56192a;
+    --line: #d9c9bf;
+    --gold: #f3c65c;
+    --serif: "Instrument Serif", Georgia, serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: system-ui, sans-serif;
+    line-height: 1.5;
+}
+
+.container {
+    width: min(70rem, calc(100% - clamp(2rem, 9vw, 8rem)));
+    margin-inline: auto;
+}
+
+.site-header {
+    padding-block: 1.15rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--burgundy-dark);
+    font-size: 1.15rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.brand-mark {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border-radius: 0.65rem;
+    background: var(--burgundy);
+    color: var(--surface);
+    font-size: 0.85rem;
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.65fr);
+    align-items: center;
+    gap: clamp(2rem, 6vw, 5rem);
+    padding-block: clamp(3rem, 8vw, 6rem);
+}
+
+.hero h1 {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 400;
+    letter-spacing: -0.06em;
+    line-height: 0.95;
+}
+
+.hero h1 em {
+    color: var(--burgundy);
+}
+
+.intro {
+    max-width: 33ch;
+    margin: 1.25rem 0 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+}
+
+.ticket {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border-radius: 2.75rem 0.7rem 2.75rem 0.7rem;
+    background: var(--gold);
+    color: #3b251b;
+    box-shadow: 0.45rem 0.5rem 0 #dca394;
+}
+
+.ticket h2 {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.ticket-counts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 1.25rem 0 0;
+    padding-top: 0.85rem;
+    border-top: 1px dashed #785226;
+}
+
+.ticket-counts dt {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.ticket-counts dd {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    line-height: 1.1;
+}
+
+.collection {
+    padding-block: 1.5rem 4rem;
+    border-top: 1px solid var(--line);
+}
+
+.collection > h2 {
+    margin: 0 0 1rem;
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    font-weight: 400;
+}
+
+.add-film {
+    max-width: 38rem;
+    margin-bottom: 1.5rem;
+}
+
+.add-film label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 650;
+}
+
+.add-film-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem;
+}
+
+input,
+button {
+    min-height: 44px;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    font: inherit;
+}
+
+input {
+    width: 100%;
+    min-width: 0;
+    border-color: #9d8481;
+    background: var(--surface);
+    color: var(--ink);
+}
+
+button {
+    background: var(--burgundy);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--burgundy-dark);
+}
+
+button.secondary {
+    border-color: #9d8481;
+    background: transparent;
+    color: var(--burgundy-dark);
+}
+
+button.secondary:hover {
+    background: #f1e3da;
+}
+
+button:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.film-list {
+    display: grid;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.film-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line);
+    border-inline-start: 4px solid var(--burgundy);
+    border-radius: 0.6rem;
+    background: var(--surface);
+}
+
+.film-details {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+}
+
+.film-details h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
+}
+
+.status {
+    padding: 0.15rem 0.65rem;
+    border-radius: 2rem;
+    background: #f8e5b9;
+    color: #5e3a13;
+    font-size: 0.8rem;
+    font-weight: 750;
+}
+
+.status[data-watched="true"] {
+    background: #e0eee1;
+    color: #244e34;
+}
+
+.error {
+    margin: 0.4rem 0 0;
+    color: #922139;
+}
+
+.error:empty {
+    margin: 0;
+}
+
+.empty-state {
+    color: var(--muted);
+}
+
+:focus-visible {
+    outline: 3px solid #245d96;
+    outline-offset: 3px;
+}
+
+@media (max-width: 42rem) {
+    .hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ticket {
+        width: min(100%, 24rem);
+    }
+}
+
+@media (max-width: 24rem) {
+    .add-film-controls {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .add-film-controls button {
+        justify-self: start;
+    }
+}
+:root {
+    --paper: #edf6ff;
+    --surface: #fbfdff;
+    --ink: #142d45;
+    --muted: #49647e;
+    --burgundy: #205e91;
+    --burgundy-dark: #16466f;
+    --line: #c7dcef;
+    --gold: #c7e8ff;
+}
+
+body {
+    background: linear-gradient(155deg, #f9fcff 0%, var(--paper) 50%, #e4f1ff 100%);
+    min-height: 100vh;
+}
+
+.ticket {
+    background: linear-gradient(145deg, #dff4ff, var(--gold));
+    color: var(--ink);
+    border: 1px solid #aacfeb;
+    box-shadow: 0.45rem 0.5rem 0 #b5d7f1;
+}
+
+.ticket-counts {
+    border-top-color: #709bbd;
+}
+
+input,
+button.secondary {
+    border-color: #7798b5;
+}
+
+button.secondary:hover {
+    background: #e0effc;
+}
+
+.film-row {
+    border-inline-start-color: #6ba9d6;
+}
+
+.status {
+    background: #dceefe;
+    color: #174c76;
+}
+
+.status[data-watched="true"] {
+    background: #ddf1ed;
+    color: #205a50;
+}
+:root {
+    --serif: "Times New Roman", Times, serif;
+}
+
+body {
+    font-family: var(--serif);
+}
