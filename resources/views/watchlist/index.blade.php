@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My watchlist | After Credits</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <script src="{{ asset('js/cinema-showtimes.js') }}" defer></script>
     <script src="{{ asset('js/movie-search.js') }}" defer></script>
 </head>
 <body>
@@ -52,7 +53,8 @@
         <section class="collection" aria-labelledby="film-search-title">
             <h2 id="film-search-title">Find a film</h2>
 
-            <form id="film-search-form" class="add-film" method="GET" action="{{ route('movies.search') }}">
+            <form id="film-search-form" class="add-film" method="GET"
+                  action="{{ route('movies.search') }}">
                 <label for="film-query">Film title to search</label>
                 <div class="add-film-controls">
                     <input id="film-query" name="query" type="search"
@@ -63,7 +65,9 @@
 
             <div id="film-match-controls" hidden>
                 <p id="film-match-status" role="status"></p>
-                <button id="cancel-film-match" class="secondary" type="button">Cancel matching</button>
+                <button id="cancel-film-match" class="secondary" type="button">
+                    Cancel matching
+                </button>
             </div>
 
             <p id="film-search-status" role="status"></p>
@@ -100,18 +104,16 @@
                         <li class="film-row">
                             <div class="film-details">
                                 <h3>{{ $item->title }}</h3>
-                                <span class="status" data-watch-status
-                                      data-watched="{{ $item->watched ? 'true' : 'false' }}"
-                                      tabindex="-1">
+                                <span class="status" data-watch-status tabindex="-1"
+                                      data-watched="{{ $item->watched ? 'true' : 'false' }}">
                                     {{ $item->watched ? 'Watched' : 'Unwatched' }}
                                 </span>
                             </div>
 
                             <div style="display: grid; gap: 0.5rem;">
                                 @unless ($item->watched)
-                                    <form method="POST"
-                                          action="{{ route('watchlist.mark-watched', ['item' => $item->id]) }}"
-                                          data-mark-watched>
+                                    <form method="POST" data-mark-watched
+                                          action="{{ route('watchlist.mark-watched', ['item' => $item->id]) }}">
                                         @csrf
                                         @method('PATCH')
                                         <button class="secondary" type="submit"
@@ -122,9 +124,8 @@
                                     </form>
                                 @endunless
 
-                                <form method="POST"
-                                      action="{{ route('watchlist.destroy', ['item' => $item->id]) }}"
-                                      data-remove-film="{{ $item->title }}">
+                                <form method="POST" data-remove-film="{{ $item->title }}"
+                                      action="{{ route('watchlist.destroy', ['item' => $item->id]) }}">
                                     @csrf
                                     @method('DELETE')
                                     <button class="secondary" type="submit"
@@ -134,9 +135,8 @@
                                 </form>
 
                                 @unless ($item->tmdb_id)
-                                    <form method="POST"
-                                          action="{{ route('watchlist.match', ['item' => $item->id]) }}"
-                                          data-match-film="{{ $item->title }}">
+                                    <form method="POST" data-match-film="{{ $item->title }}"
+                                          action="{{ route('watchlist.match', ['item' => $item->id]) }}">
                                         @csrf
                                         @method('PATCH')
                                         <input type="hidden" name="tmdb_id" value="">
@@ -152,6 +152,8 @@
                                 <div data-saved-watch-options
                                      data-tmdb-id="{{ $item->tmdb_id }}"
                                      data-film-title="{{ $item->title }}"
+                                     data-editions-url="{{ route('movies.cinema-editions', ['movie' => $item->tmdb_id], false) }}"
+                                     data-showtimes-url="{{ route('cinemas.showtimes', ['film' => 'MOVIEGLU_ID'], false) }}"
                                      style="flex-basis: 100%;"></div>
                             @else
                                 <a href="#film-query">Find watch options for {{ $item->title }} in film search</a>
@@ -172,6 +174,14 @@
                 };
 
                 container.append(createWatchOptions(film));
+
+                container.append(createCinemaShowtimes(film, {
+                    editions: container.dataset.editionsUrl,
+                    showtimes: (editionId) => container.dataset.showtimesUrl.replace(
+                        'MOVIEGLU_ID',
+                        encodeURIComponent(editionId),
+                    ),
+                }));
             });
         });
 
@@ -180,9 +190,7 @@
 
         document.querySelectorAll('[data-remove-film]').forEach((form) => {
             form.addEventListener('submit', (event) => {
-                const title = form.dataset.removeFilm;
-
-                if (!window.confirm(`Remove "${title}" from your watchlist?`)) {
+                if (!window.confirm(`Remove "${form.dataset.removeFilm}" from your watchlist?`)) {
                     event.preventDefault();
                 }
             });

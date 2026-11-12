@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CinemaFilmMatchController;
 use App\Http\Controllers\CinemaSearchController;
 use App\Http\Controllers\CinemaShowtimesController;
 use App\Http\Controllers\MovieSearchController;
@@ -30,6 +31,10 @@ Route::get('/movies/search', [MovieSearchController::class, 'search'])
 Route::get('/movies/{movie}/watch-providers', [MovieWatchProvidersController::class, 'show'])
     ->whereNumber('movie')
     ->name('movies.watch-providers');
+
+Route::get('/movies/{movie}/cinema-editions', [CinemaFilmMatchController::class, 'show'])
+    ->whereNumber('movie')
+    ->name('movies.cinema-editions');
 
 Route::view('/cinemas', 'cinemas')->name('cinemas.index');
 
