@@ -8,6 +8,21 @@ use Illuminate\Support\Facades\Http;
 
 class MovieWatchProvidersController extends Controller
 {
+    private const PROVIDER_WEBSITES = [
+        2 => 'https://tv.apple.com/gb',
+        8 => 'https://www.netflix.com/gb/',
+        9 => 'https://www.primevideo.com/movie?tr=gb',
+        10 => 'https://www.primevideo.com/movie?tr=gb',
+        35 => 'https://www.rakuten.tv/uk',
+        130 => 'https://www.skystore.com/',
+        192 => 'https://www.youtube.com/feed/storefront',
+        591 => 'https://www.nowtv.com/gb/help/article/cinema-membership',
+        1796 => 'https://www.netflix.com/gb/',
+        1825 => 'https://www.primevideo.com/movie?tr=gb',
+        1899 => 'https://www.hbomax.com/gb/en',
+        2100 => 'https://www.primevideo.com/movie?tr=gb',
+    ];
+
     public function show(int $movie): JsonResponse
     {
         $token = config('services.tmdb.read_token');
@@ -31,9 +46,7 @@ class MovieWatchProvidersController extends Controller
         }
 
         if ($response->notFound()) {
-            return response()->json([
-                'message' => 'Film not found.',
-            ], 404);
+            return response()->json(['message' => 'Film not found.'], 404);
         }
 
         if (! $response->successful()) {
@@ -43,13 +56,26 @@ class MovieWatchProvidersController extends Controller
         }
 
         $providers = $response->json('results.GB') ?? [];
+        $subscription = $providers['flatrate'] ?? [];
+        $rent = $providers['rent'] ?? [];
+        $buy = $providers['buy'] ?? [];
+        $websites = [];
+
+        foreach (array_merge($subscription, $rent, $buy) as $provider) {
+            $website = self::PROVIDER_WEBSITES[$provider['provider_id']] ?? null;
+
+            if ($website !== null) {
+                $websites[$provider['provider_name']] = $website;
+            }
+        }
 
         return response()->json([
             'region' => 'GB',
-            'subscription' => array_column($providers['flatrate'] ?? [], 'provider_name'),
-            'rent' => array_column($providers['rent'] ?? [], 'provider_name'),
-            'buy' => array_column($providers['buy'] ?? [], 'provider_name'),
+            'subscription' => array_column($subscription, 'provider_name'),
+            'rent' => array_column($rent, 'provider_name'),
+            'buy' => array_column($buy, 'provider_name'),
             'link' => $providers['link'] ?? null,
+            'websites' => (object) $websites,
         ]);
     }
 }
