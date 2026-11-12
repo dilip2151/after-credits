@@ -21,6 +21,7 @@ class WatchlistController extends Controller
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
+            'tmdb_id' => ['nullable', 'integer', 'min:1'],
         ]);
 
         WatchlistItem::create($validated);

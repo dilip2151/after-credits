@@ -48,7 +48,6 @@ function createWatchOptions(film) {
                 ['Rent', providers.rent],
                 ['Buy', providers.buy],
             ];
-
             const options = document.createElement('dl');
 
             for (const [label, names] of categories) {
@@ -104,8 +103,21 @@ function createFilmRow(film) {
     addButton.setAttribute('aria-label', `Add ${title.textContent} to watchlist`);
 
     addButton.addEventListener('click', () => {
+        const watchlistForm = watchlistInput.form;
         watchlistInput.value = film.title;
-        watchlistInput.form.requestSubmit();
+
+        const movieId = document.createElement('input');
+        movieId.type = 'hidden';
+        movieId.name = 'tmdb_id';
+        movieId.value = String(film.id);
+
+        watchlistForm.append(movieId);
+
+        try {
+            watchlistForm.requestSubmit();
+        } finally {
+            movieId.remove();
+        }
     });
 
     row.append(title, addButton, createWatchOptions(film));
