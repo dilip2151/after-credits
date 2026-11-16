@@ -95,8 +95,8 @@
         }
 
         body.after-credits {
-            background: #edf3fa;
-            color: #142942;
+            background: #f7f3ed;
+            color: #382f3a;
             font-family: system-ui, sans-serif;
             font-size: 1rem;
             line-height: 1.55;
@@ -109,7 +109,7 @@
         }
 
         .after-credits .site-header {
-            background: #10253e;
+            background: #392d3b;
             border-bottom: 0;
         }
 
@@ -125,7 +125,7 @@
             margin-block: 1.5rem;
             padding: clamp(1rem, 4vw, 2.5rem);
             border-radius: 1.25rem;
-            background: #142e4b;
+            background: #49364a;
             color: #fff;
         }
 
@@ -138,13 +138,13 @@
 
         .watchlist-page .hero h1 em,
         .watchlist-page .hero .intro {
-            color: #cbe1fa;
+            color: #f3dce9;
         }
 
         .watchlist-page .ticket {
             box-shadow: none;
             background: #e7f1ff;
-            color: #142942;
+            color: #382f3a;
             border-radius: 1rem;
         }
 
@@ -163,7 +163,7 @@
             min-width: 0;
             margin: 0;
             padding: clamp(1rem, 3vw, 1.5rem);
-            border: 1px solid #cad9e9;
+            border: 1px solid #ddd2da;
             border-radius: 1rem;
             background: #fff;
         }
@@ -174,13 +174,13 @@
         }
 
         .watchlist-page summary {
-            color: #174779;
+            color: #44334a;
             font-weight: 650;
         }
 
         .watchlist-page .film-row {
-            background: #f7faff;
-            border: 1px solid #cad9e9;
+            background: #faf7f2;
+            border: 1px solid #ddd2da;
             border-radius: 0.8rem;
             padding: 0.85rem;
             overflow-wrap: anywhere;
@@ -198,7 +198,7 @@
         .watchlist-page .film-availability > details {
             padding-inline: 0.65rem;
             border-radius: 0.5rem;
-            background: #eef4fc;
+            background: #eaf0e7;
         }
 
         .watchlist-page .film-availability > details + details {
@@ -211,15 +211,10 @@
         }
 
         .after-credits :focus-visible {
-            outline: 3px solid #337ab7;
+            outline: 3px solid #765181;
             outline-offset: 3px;
         }
 
-        @media (min-width: 58rem) {
-            .watchlist-workspace {
-                grid-template-columns: minmax(18rem, 2fr) minmax(0, 3fr);
-            }
-        }
 
         @media (max-width: 44rem) {
             .watchlist-page .hero {
@@ -234,7 +229,7 @@
             }
         }
         .watchlist-group + .watchlist-group {
-            border-top: 1px solid #cad9e9;
+            border-top: 1px solid #ddd2da;
             margin-top: 1.5rem;
             padding-top: 1rem;
         }
@@ -251,6 +246,288 @@
         .saved-film .rewatch-options {
             min-width: 0;
             grid-column: 1 / -1;
+        }
+
+        .saved-film .saved-film-poster {
+            display: grid;
+            place-items: center;
+            flex: 0 0 3.5rem;
+            width: 3.5rem;
+            aspect-ratio: 2 / 3;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            background: #e9e1eb;
+            color: #5b4a60;
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .saved-film .saved-film-poster img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .watchlist-shortcuts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(8rem, 100%), 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .watchlist-shortcuts a {
+            display: grid;
+            place-items: center;
+            min-height: 44px;
+            padding: 0.5rem;
+            border: 1px solid #ddd2da;
+            border-radius: 0.65rem;
+            background: #fff;
+            color: #44334a;
+            font-weight: 650;
+            text-align: center;
+        }
+
+        .watchlist-shortcuts a[aria-current="page"],
+        .watchlist-shortcuts a:hover {
+            background: #44334a;
+            color: #fff;
+        }
+
+        .watchlist-page .watchlist-group > h3 {
+            color: #44334a;
+            font-size: 1.15rem;
+            margin-bottom: 0.85rem;
+            scroll-margin-top: 1rem;
+        }
+
+        .watchlist-page .saved-film .film-details {
+            display: grid;
+            grid-template-columns: 3.5rem minmax(0, 1fr);
+            gap: 0.75rem;
+        }
+
+        .watchlist-page .saved-film .film-details h4 {
+            font-size: 1.05rem;
+            line-height: 1.35;
+        }
+
+        .watchlist-page .saved-film .film-details .status {
+            grid-column: 2;
+            justify-self: start;
+        }
+
+        .watchlist-page .film-availability > details[open] {
+            padding-bottom: 0.65rem;
+        }
+
+        .watchlist-page [data-page-panel][hidden],
+        .watchlist-page [data-watchlist-overview][hidden] {
+            display: none;
+        }
+
+        .watchlist-page .watchlist-workspace {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .watchlist-page[data-view] .watchlist-shortcuts {
+            margin-top: 1rem;
+        }
+
+        .watchlist-page[data-view] .watchlist-group {
+            border: 0;
+            margin: 0;
+            padding: 0;
+        }
+        .watchlist-page .watchlist-count-links {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+
+        .watchlist-count-links a {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            min-height: 44px;
+            padding: 0.55rem;
+            border: 1px solid #cdbace;
+            border-radius: 0.6rem;
+            background: #fff;
+            color: #44334a;
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+
+        .watchlist-count-links a:hover,
+        .watchlist-count-links a[aria-current="page"] {
+            background: #44334a;
+            color: #fff;
+        }
+
+        .watchlist-count-links strong {
+            font-size: clamp(1.35rem, 4vw, 2rem);
+            line-height: 1.1;
+        }
+
+        .watchlist-page .hero {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+        }
+
+        .watchlist-poster-stack {
+            position: absolute;
+            z-index: -1;
+            inset: 0 38% 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0.22;
+        }
+
+        .watchlist-poster-stack img {
+            flex: 0 1 auto;
+            width: clamp(5rem, 15vw, 12rem);
+            min-width: 0;
+            height: auto;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            border-radius: 0.65rem;
+            box-shadow: 0 8px 24px #08172c;
+            transform: rotate(-9deg);
+        }
+
+        .watchlist-poster-stack img + img {
+            margin-inline-start: -1.15rem;
+        }
+
+        .watchlist-poster-stack img:nth-child(even) {
+            transform: rotate(9deg);
+        }
+
+        @media (max-width: 44rem) {
+            .watchlist-poster-stack {
+                inset: 0;
+            }
+        }
+
+        body.after-credits {
+            background: #f7f3ed;
+        }
+
+        .watchlist-page .hero {
+            align-items: center;
+            gap: clamp(1rem, 4vw, 3rem);
+            padding: clamp(1.25rem, 5vw, 3.75rem);
+            border: 1px solid #715868;
+            border-radius: 1.5rem;
+            background: linear-gradient(120deg, #342633, #604858);
+            box-shadow: 0 16px 35px #392d3b24;
+        }
+
+        .watchlist-page .hero h1 {
+            font-weight: 750;
+            letter-spacing: -0.045em;
+        }
+
+        .watchlist-page .hero .intro {
+            max-width: 32ch;
+            margin-bottom: 0;
+        }
+
+        .watchlist-poster-stack {
+            inset-inline: 4% 32%;
+            justify-content: flex-end;
+            opacity: 0.38;
+            mask-image: linear-gradient(90deg, transparent, #000 48%);
+        }
+
+        .watchlist-poster-stack img {
+            width: clamp(5rem, 13vw, 10rem);
+            border: 1px solid #bda3b5;
+        }
+
+        .watchlist-page .ticket {
+            padding: clamp(0.85rem, 3vw, 1.5rem);
+            background: #49364a;
+            border: 1px solid #aa8fa7;
+            color: #fff;
+            box-shadow: 0 10px 28px #07182755;
+        }
+
+        .watchlist-page .ticket h2 {
+            color: #faedf5;
+        }
+
+        .watchlist-count-links a {
+            padding: clamp(0.55rem, 2vw, 0.9rem);
+            background: #eee5f3;
+            font-weight: 650;
+        }
+
+        .watchlist-page .watchlist-workspace > .collection {
+            padding: clamp(1rem, 3vw, 2rem);
+            border-radius: 1.15rem;
+            box-shadow: 0 8px 24px #392d3b0b;
+        }
+
+        .watchlist-page #film-search-title {
+            font-size: clamp(1.4rem, 3vw, 1.85rem);
+            letter-spacing: -0.025em;
+        }
+
+        .watchlist-page .add-film-controls input {
+            min-height: 44px;
+            border-radius: 0.65rem;
+        }
+
+        .watchlist-page .add-film-controls button {
+            border-radius: 0.65rem;
+        }
+
+        @media (max-width: 44rem) {
+            .watchlist-poster-stack {
+                inset: 0 0 auto;
+                height: 12rem;
+                opacity: 0.25;
+            }
+        }
+        .watchlist-page .watchlist-count-links a:first-child:not([aria-current]):not(:hover):not(:focus-visible) {
+            background: #e7efdf;
+            color: #304332;
+        }
+
+        .watchlist-page .watchlist-count-links a:hover,
+        .watchlist-page .watchlist-count-links a:focus-visible,
+        .watchlist-page .watchlist-count-links a[aria-current="page"] {
+            background: #5b405d;
+            color: #fff;
+        }
+
+        .watchlist-page button:not(.secondary) {
+            background: #5b405d;
+            color: #fff;
+        }
+
+        .watchlist-page .secondary {
+            background: #f1e8f2;
+            border-color: #cdbace;
+            color: #44334a;
+        }
+
+        .watchlist-page .status[data-watched="true"] {
+            background: #e7efdf;
+            color: #304332;
+        }
+
+        .watchlist-page .search-film-poster,
+        .watchlist-page .search-film-options > details {
+            background: #eee5f3;
+            color: #44334a;
         }
     </style>
     <script src="{{ asset('js/cinema-showtimes.js') }}" defer></script>
@@ -270,7 +547,6 @@
                     <span class="brand-mark" aria-hidden="true">▶</span>
                     After Credits
                 </a>
-                <a href="{{ route('cinemas.index') }}">Cinema Finder</a>
                 <a href="{{ route('credits.index') }}">Credits</a>
             </nav>
         </div>
@@ -281,25 +557,45 @@
             <div>
                 <h1 id="page-title">My <em>watchlist</em></h1>
                 <p class="intro">Keep track of the films you want to see and the ones you’ve watched.</p>
+                @php
+                    $filmsWithTmdbIds = $items->filter(fn ($item) => $item->tmdb_id);
+                    $bannerFilms = $filmsWithTmdbIds->reject(fn ($item) => $item->watched)->take(2)
+                        ->concat($filmsWithTmdbIds->filter(fn ($item) => $item->watched)->take(2));
+                @endphp
+
+                @if ($bannerFilms->isNotEmpty())
+                    <div class="watchlist-poster-stack" aria-hidden="true">
+                        @foreach ($bannerFilms as $film)
+                            <img src="{{ route('watchlist.poster', ['item' => $film->id]) }}"
+                                 alt="" width="64" height="96" decoding="async"
+                                 onerror="this.remove()">
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
             <aside class="ticket" aria-labelledby="ticket-title">
                 <h2 id="ticket-title">Watchlist at a glance</h2>
-                <dl class="ticket-counts">
-                    <div>
-                        <dt>To watch</dt>
-                        <dd id="unwatched-count">{{ $unwatchedCount }}</dd>
-                    </div>
-                    <div>
-                        <dt>Watched</dt>
-                        <dd id="watched-count">{{ $watchedCount }}</dd>
-                    </div>
-                </dl>
+                <div class="ticket-counts watchlist-count-links">
+                    <a href="#yet-to-watch" data-view-link="yet-to-watch">
+                        <span>Yet to watch</span>
+                        <strong id="unwatched-count">{{ $unwatchedCount }}</strong>
+                    </a>
+                    <a href="#watched" data-view-link="watched">
+                        <span>Watched</span>
+                        <strong id="watched-count">{{ $watchedCount }}</strong>
+                    </a>
+                </div>
             </aside>
         </section>
 
+        <nav class="watchlist-shortcuts" aria-label="Watchlist shortcuts">
+            <a href="#find-a-film" data-view-link="find-a-film">Find a film</a>
+            <a href="{{ route('cinemas.index') }}">Cinema Finder</a>
+        </nav>
+
         <div class="watchlist-workspace">
-            <section class="collection" aria-labelledby="film-search-title">
+            <section class="collection" data-page-panel="find-a-film" aria-labelledby="film-search-title">
                 <h2 id="film-search-title">Find a film</h2>
 
                 <form id="film-search-form" class="add-film" method="GET"
@@ -336,20 +632,28 @@
                 @enderror
             </section>
 
-            <section class="collection" aria-labelledby="saved-films-title">
-                <h2 id="saved-films-title">Saved films</h2>
+            <section class="collection" data-page-panel="saved" aria-label="Watchlist films" hidden>
 
                 @foreach ([
                     'unwatched' => ['Yet to watch', $items->reject(fn ($item) => $item->watched), 'Search for a film and select Add to watchlist.'],
                     'watched' => ['Watched', $items->filter(fn ($item) => $item->watched), 'Films you mark as watched will appear here.'],
                 ] as $group => [$heading, $groupItems, $emptyMessage])
-                    <section class="watchlist-group" aria-labelledby="{{ $group }}-heading">
+                    <section class="watchlist-group" data-page-panel="{{ $group === 'unwatched' ? 'yet-to-watch' : 'watched' }}" aria-labelledby="{{ $group }}-heading">
                         <h3 id="{{ $group }}-heading">{{ $heading }}</h3>
                         <p id="{{ $group }}-empty" class="empty-state" @if ($groupItems->isNotEmpty()) hidden @endif>{{ $emptyMessage }}</p>
                         <ul id="{{ $group }}-films" class="film-list" role="list" @if ($groupItems->isEmpty()) hidden @endif>
                             @foreach ($groupItems as $item)
                                 <li class="film-row saved-film">
                                     <div class="film-details">
+                                        <span class="saved-film-poster" aria-hidden="true">
+                                            @if ($item->tmdb_id)
+                                                <img src="{{ route('watchlist.poster', ['item' => $item->id]) }}"
+                                                     alt="" width="56" height="84" loading="lazy" decoding="async"
+                                                     onerror="this.parentElement.textContent = 'No poster'">
+                                            @else
+                                                No poster
+                                            @endif
+                                        </span>
                                         <h4>{{ $item->title }}</h4>
                                         <span class="status" data-watch-status tabindex="-1"
                                               @unless ($item->watched) hidden @endunless
@@ -404,7 +708,7 @@
                                              data-showtimes-url="{{ route('cinemas.showtimes', ['film' => 'MOVIEGLU_ID'], false) }}"></div>
                                     @else
                                         <div class="film-availability">
-                                            <a href="#film-query">Find watch options for {{ $item->title }} in film search</a>
+                                            <a href="#find-a-film">Find watch options for {{ $item->title }} in film search</a>
                                         </div>
                                     @endif
                                 </li>
@@ -417,6 +721,50 @@
     </main>
 
     <script>
+        const watchlistPage = document.querySelector('.watchlist-page');
+        const viewLinks = [...watchlistPage.querySelectorAll('[data-view-link]')];
+
+        function showWatchlistView() {
+            const view = window.location.hash.slice(1);
+            const selected = viewLinks.some((link) => link.dataset.viewLink === view);
+
+            if (selected) {
+                watchlistPage.dataset.view = view;
+            } else {
+                delete watchlistPage.dataset.view;
+            }
+
+            watchlistPage.querySelectorAll('[data-watchlist-overview]').forEach((element) => {
+                element.hidden = selected;
+            });
+
+            watchlistPage.querySelectorAll('[data-page-panel]').forEach((panel) => {
+                const name = panel.dataset.pagePanel;
+                const showingList = view === 'yet-to-watch' || view === 'watched';
+                panel.hidden = name === 'saved'
+                    ? !showingList
+                    : selected && name !== view;
+            });
+
+            viewLinks.forEach((link) => {
+                if (link.dataset.viewLink === view) {
+                    link.setAttribute('aria-current', 'page');
+                } else {
+                    link.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        window.addEventListener('hashchange', showWatchlistView);
+        showWatchlistView();
+
+        watchlistPage.addEventListener('click', (event) => {
+            if (event.target.closest('[data-start-film-match]')) {
+                window.location.hash = 'find-a-film';
+                showWatchlistView();
+            }
+        }, true);
+
         function wrapRewatchOptions(card) {
             const availability = card.querySelector('.film-availability');
             const disclosure = document.createElement('details');
@@ -526,7 +874,13 @@
                     unwatchedFilms.hidden = !hasUnwatchedFilms;
                     document.querySelector('#unwatched-empty').hidden = hasUnwatchedFilms;
 
-                    status.focus();
+                    if (watchlistPage.dataset.view === 'yet-to-watch') {
+                        const heading = document.querySelector('#unwatched-heading');
+                        heading.tabIndex = -1;
+                        heading.focus();
+                    } else {
+                        status.focus();
+                    }
                 } catch {
                     errorMessage.textContent = 'Could not confirm the update. Please try again.';
                     button.disabled = false;

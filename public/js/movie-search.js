@@ -36,14 +36,9 @@ function createWatchOptions(film) {
     const summary = document.createElement('summary');
     const status = document.createElement('p');
 
-    summary.textContent = 'Where to watch in the UK';
-    summary.setAttribute('aria-label', `Where to watch ${film.title} in the UK`);
-    summary.style.minHeight = '44px';
-    summary.style.paddingBlock = '0.6rem';
-    summary.style.cursor = 'pointer';
+    summary.textContent = 'Online platform';
+    summary.setAttribute('aria-label', `Online platform options for ${film.title}`);
     status.setAttribute('role', 'status');
-
-    details.style.flexBasis = '100%';
     details.append(summary, status);
 
     let loading = false;
@@ -58,7 +53,7 @@ function createWatchOptions(film) {
         status.textContent = 'Loading UK watch options…';
 
         try {
-            const url = new URL(`${film.id}/watch-providers`, searchForm.action);
+            const url = new URL(`${encodeURIComponent(film.id)}/watch-providers`, searchForm.action);
             const response = await fetch(url, {
                 headers: { Accept: 'application/json' },
             });
@@ -74,7 +69,6 @@ function createWatchOptions(film) {
                 ['Buy', providers.buy],
             ];
             const options = document.createElement('dl');
-            const websites = providers.websites ?? {};
 
             for (const [label, names] of categories) {
                 if (!Array.isArray(names) || names.length === 0) {
@@ -91,7 +85,7 @@ function createWatchOptions(film) {
 
                 for (const name of names) {
                     const item = document.createElement('li');
-                    const website = getHttpsUrl(websites[name]);
+                    const website = getHttpsUrl(providers.websites?.[name]);
 
                     if (website) {
                         item.append(createLink(name, website));
@@ -112,7 +106,6 @@ function createWatchOptions(film) {
                 details.append(options);
 
                 const listingsUrl = getHttpsUrl(providers.link);
-
                 if (listingsUrl) {
                     const listings = document.createElement('p');
                     listings.append(createLink(`View all UK listings for ${film.title}`, listingsUrl));
@@ -126,7 +119,6 @@ function createWatchOptions(film) {
                     '.',
                 );
                 details.append(credit);
-
                 status.textContent = 'UK watch options loaded.';
             }
 
@@ -143,19 +135,48 @@ function createWatchOptions(film) {
 
 function createFilmRow(film, selectedMatchForm) {
     const row = document.createElement('li');
-    row.className = 'film-row';
+    row.className = 'film-row search-film-card';
 
-    const title = document.createElement('strong');
+    const poster = document.createElement('div');
+    poster.className = 'search-film-poster';
+    poster.setAttribute('aria-hidden', 'true');
+    poster.textContent = 'No poster';
+
+    if (typeof film.poster_path === 'string' &&
+        /^\/[\w-]+\.(jpe?g|png|webp)$/i.test(film.poster_path)) {
+        const image = document.createElement('img');
+        image.alt = '';
+        image.loading = 'lazy';
+        image.decoding = 'async';
+        image.addEventListener('error', () => {
+            poster.textContent = 'No poster';
+        }, { once: true });
+        image.src = `https://image.tmdb.org/t/p/w185${film.poster_path}`;
+        poster.replaceChildren(image);
+    }
+
+    const info = document.createElement('div');
+    info.className = 'search-film-info';
+
+    const title = document.createElement('h3');
+    title.textContent = film.title;
+    info.append(title);
+
     const year = film.release_date?.slice(0, 4);
-    title.textContent = year ? `${film.title} (${year})` : film.title;
+    if (year) {
+        const releaseYear = document.createElement('p');
+        releaseYear.className = 'search-film-year';
+        releaseYear.textContent = year;
+        info.append(releaseYear);
+    }
 
+    const filmLabel = year ? `${film.title} (${year})` : film.title;
     const actionButton = document.createElement('button');
     actionButton.type = 'button';
-    actionButton.className = 'secondary';
     actionButton.textContent = selectedMatchForm ? 'Use this match' : 'Add to watchlist';
     actionButton.setAttribute('aria-label', selectedMatchForm
-        ? `Match ${selectedMatchForm.dataset.matchFilm} to ${title.textContent}`
-        : `Add ${title.textContent} to watchlist`);
+        ? `Use this match: ${filmLabel}`
+        : `Add to watchlist: ${filmLabel}`);
 
     actionButton.addEventListener('click', () => {
         if (selectedMatchForm) {
@@ -180,6 +201,13 @@ function createFilmRow(film, selectedMatchForm) {
         }
     });
 
+    info.append(actionButton);
+
+    const onlinePanel = createWatchOptions(film);
+    onlinePanel.querySelector('summary').setAttribute(
+        'aria-label', `Online platform options for ${filmLabel}`,
+    );
+
     const cinemaPanel = createCinemaShowtimes(film, {
         editions: new URL(`${encodeURIComponent(film.id)}/cinema-editions`, searchForm.action),
         showtimes: (editionId) => new URL(
@@ -187,9 +215,15 @@ function createFilmRow(film, selectedMatchForm) {
             searchForm.action,
         ),
     });
-    cinemaPanel.style.flexBasis = '100%';
+    const cinemaSummary = cinemaPanel.querySelector('summary');
+    cinemaSummary.textContent = 'Cinemas';
+    cinemaSummary.setAttribute('aria-label', `Cinemas and showtimes for ${filmLabel}`);
 
-    row.append(title, actionButton, createWatchOptions(film), cinemaPanel);
+    const options = document.createElement('div');
+    options.className = 'search-film-options';
+    options.append(onlinePanel, cinemaPanel);
+
+    row.append(poster, info, options);
     return row;
 }
 
@@ -206,7 +240,6 @@ searchForm.addEventListener('submit', async (event) => {
     clearSearch();
 
     const query = searchInput.value.trim();
-
     if (query.length < 2) {
         searchStatus.textContent = 'Enter at least two characters.';
         return;
@@ -218,7 +251,6 @@ searchForm.addEventListener('submit', async (event) => {
 
     const url = new URL(searchForm.action);
     url.searchParams.set('query', query);
-
     searchButton.disabled = true;
     searchStatus.textContent = 'Searching for films…';
 
@@ -233,7 +265,6 @@ searchForm.addEventListener('submit', async (event) => {
         }
 
         const { results } = await response.json();
-
         if (activeSearch !== request) {
             return;
         }

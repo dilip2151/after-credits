@@ -15,6 +15,10 @@ Route::get('/watchlist', [WatchlistController::class, 'index']);
 Route::post('/watchlist', [WatchlistController::class, 'store'])
     ->name('watchlist.store');
 
+Route::get('/watchlist/{item}/poster', [WatchlistController::class, 'poster'])
+    ->whereNumber('item')
+    ->name('watchlist.poster');
+
 Route::patch('/watchlist/{item}/watched', [WatchlistController::class, 'markWatched'])
     ->name('watchlist.mark-watched');
 
