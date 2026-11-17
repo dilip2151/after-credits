@@ -11,6 +11,41 @@ const cancelMatchButton = document.querySelector('#cancel-film-match');
 let matchForm = null;
 let activeSearch = null;
 
+let savingFilm = false;
+let savedListNeedsRefresh = false;
+const savedFilmIds = new Set();
+
+const saveFeedback = document.createElement('div');
+saveFeedback.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+saveFeedback.setAttribute('role', 'status');
+
+const saveToast = document.createElement('div');
+saveToast.className = 'toast';
+saveToast.setAttribute('aria-atomic', 'true');
+
+const saveToastMessage = document.createElement('div');
+saveToastMessage.className = 'toast-body';
+saveToast.append(saveToastMessage);
+saveFeedback.append(saveToast);
+document.body.append(saveFeedback);
+
+function showSaveConfirmation(message) {
+    if (window.bootstrap?.Toast) {
+        window.bootstrap.Toast.getOrCreateInstance(saveToast).show();
+        saveToastMessage.textContent = message;
+    } else {
+        searchStatus.textContent = message;
+    }
+}
+
+function refreshSavedList() {
+    if (savedListNeedsRefresh && window.location.hash === '#yet-to-watch') {
+        window.location.reload();
+    }
+}
+
+window.addEventListener('hashchange', refreshSavedList);
+
 function createLink(label, url) {
     const link = document.createElement('a');
     link.textContent = label;
@@ -178,30 +213,82 @@ function createFilmRow(film, selectedMatchForm) {
         ? `Use this match: ${filmLabel}`
         : `Add to watchlist: ${filmLabel}`);
 
-    actionButton.addEventListener('click', () => {
+    const saveError = document.createElement('p');
+    saveError.className = 'error';
+    saveError.setAttribute('role', 'alert');
+    saveError.style.margin = '0';
+
+    actionButton.addEventListener('click', async () => {
         if (selectedMatchForm) {
             selectedMatchForm.elements.namedItem('tmdb_id').value = String(film.id);
             selectedMatchForm.requestSubmit();
             return;
         }
 
-        const watchlistForm = watchlistInput.form;
-        watchlistInput.value = film.title;
+        if (savingFilm) {
+            saveError.textContent = 'Another film is being saved. Try again in a moment.';
+            return;
+        }
 
-        const movieId = document.createElement('input');
-        movieId.type = 'hidden';
-        movieId.name = 'tmdb_id';
-        movieId.value = String(film.id);
-        watchlistForm.append(movieId);
+        savingFilm = true;
+        saveError.textContent = '';
+        actionButton.disabled = true;
+        actionButton.textContent = 'Adding…';
+
+        const watchlistForm = watchlistInput.form;
+        const data = new FormData(watchlistForm);
+        data.set('title', film.title);
+        data.set('tmdb_id', String(film.id));
 
         try {
-            watchlistForm.requestSubmit();
+            const response = await fetch(watchlistForm.action, {
+                method: 'POST',
+                headers: { Accept: 'application/json' },
+                body: data,
+            });
+
+            if (response.status !== 201) {
+                throw new Error('Watchlist save failed');
+            }
+
+            const result = await response.json();
+            if (!Number.isInteger(result.unwatched_count)) {
+                throw new Error('Invalid watchlist response');
+            }
+
+            savedFilmIds.add(film.id);
+            savedListNeedsRefresh = true;
+            document.querySelector('#unwatched-count').textContent = result.unwatched_count;
+            actionButton.textContent = 'Added';
+            actionButton.setAttribute('aria-label', `Added to watchlist: ${filmLabel}`);
+            showSaveConfirmation(`${filmLabel} added to your watchlist.`);
+            refreshSavedList();
+        } catch {
+            actionButton.disabled = false;
+            actionButton.textContent = 'Add to watchlist';
+            saveError.textContent = 'Could not confirm the save. Check your watchlist before trying again.';
         } finally {
-            movieId.remove();
+            savingFilm = false;
         }
     });
 
-    info.append(actionButton);
+    if (!selectedMatchForm && savedFilmIds.has(film.id)) {
+        actionButton.disabled = true;
+        actionButton.textContent = 'Added';
+        actionButton.setAttribute('aria-label', `Added to watchlist: ${filmLabel}`);
+    }
+
+    const detailsButton = document.createElement('button');
+    detailsButton.type = 'button';
+    detailsButton.className = 'secondary';
+    detailsButton.textContent = 'Film details';
+    detailsButton.setAttribute('aria-label', `Film details: ${filmLabel}`);
+    detailsButton.addEventListener('click', () => showFilmDetails(film, detailsButton));
+
+    const actions = document.createElement('div');
+    actions.className = 'd-flex flex-wrap gap-2';
+    actions.append(actionButton, detailsButton);
+    info.append(actions, saveError);
 
     const onlinePanel = createWatchOptions(film);
     onlinePanel.querySelector('summary').setAttribute(
@@ -321,3 +408,73 @@ cancelMatchButton.addEventListener('click', () => {
     matchStatus.textContent = '';
     startButton?.focus();
 });
+const filmDetailsModal = document.querySelector('#film-details-modal');
+const filmDetailsTitle = document.querySelector('#film-details-title');
+const filmDetailsStatus = document.querySelector('#film-details-status');
+const filmDetailsContent = document.querySelector('#film-details-content');
+let detailsRequest = null;
+
+filmDetailsModal.addEventListener('hide.bs.modal', () => detailsRequest?.abort());
+
+async function showFilmDetails(film, trigger) {
+    if (!window.bootstrap?.Modal) {
+        searchStatus.textContent = 'Film details could not open. Refresh the page and try again.';
+        return;
+    }
+
+    detailsRequest?.abort();
+    const request = new AbortController();
+    detailsRequest = request;
+
+    filmDetailsTitle.textContent = film.title;
+    filmDetailsContent.replaceChildren();
+    filmDetailsStatus.textContent = 'Loading film details…';
+    filmDetailsModal.addEventListener('hidden.bs.modal', () => trigger.focus(), { once: true });
+    window.bootstrap.Modal.getOrCreateInstance(filmDetailsModal).show(trigger);
+
+    try {
+        const url = filmDetailsModal.dataset.detailsUrl.replace('MOVIE_ID', encodeURIComponent(film.id));
+        const response = await fetch(url, {
+            headers: { Accept: 'application/json' },
+            signal: request.signal,
+        });
+        if (!response.ok) {
+            throw new Error('Film details request failed');
+        }
+
+        const details = await response.json();
+        if (request.signal.aborted) {
+            return;
+        }
+
+        if (typeof film.poster_path === 'string' &&
+            /^\/[\w-]+\.(jpe?g|png|webp)$/i.test(film.poster_path)) {
+            const poster = document.createElement('img');
+            poster.src = `https://image.tmdb.org/t/p/w185${film.poster_path}`;
+            poster.alt = '';
+            poster.width = 96;
+            poster.height = 144;
+            poster.className = 'rounded object-fit-cover';
+            poster.addEventListener('error', () => poster.remove(), { once: true });
+            filmDetailsContent.append(poster);
+        }
+
+        const description = document.createElement('div');
+        description.style.flex = '1 1 14rem';
+        if (details.release_year) {
+            const year = document.createElement('p');
+            year.className = 'fw-semibold mb-2';
+            year.textContent = details.release_year;
+            description.append(year);
+        }
+        const synopsis = document.createElement('p');
+        synopsis.textContent = details.overview || 'No synopsis available.';
+        description.append(synopsis);
+        filmDetailsContent.append(description);
+        filmDetailsStatus.textContent = '';
+    } catch {
+        if (!request.signal.aborted) {
+            filmDetailsStatus.textContent = 'Could not load film details. Close this window and try again.';
+        }
+    }
+}

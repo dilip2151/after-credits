@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My watchlist | After Credits</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
         .watchlist-page .hero {
@@ -720,6 +721,22 @@
         </div>
     </main>
 
+    <div class="modal fade" id="film-details-modal" tabindex="-1" aria-labelledby="film-details-title"
+         aria-hidden="true" data-details-url="{{ route('movies.details', ['movie' => 'MOVIE_ID'], false) }}">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+            <div class="modal-content" style="background:#f7f3ed;color:#382f3a">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="film-details-title">Film details</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="film-details-status" role="status" class="mb-0"></p>
+                    <div id="film-details-content" class="d-flex flex-wrap align-items-start gap-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const watchlistPage = document.querySelector('.watchlist-page');
         const viewLinks = [...watchlistPage.querySelectorAll('[data-view-link]')];
@@ -888,5 +905,6 @@
             });
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>

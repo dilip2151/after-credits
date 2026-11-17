@@ -20,14 +20,21 @@ class WatchlistController extends Controller
         return view('watchlist.index', ['items' => $items]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'tmdb_id' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        WatchlistItem::create($validated);
+        $item = WatchlistItem::create($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'id' => $item->id,
+                'unwatched_count' => WatchlistItem::where('watched', false)->count(),
+            ], 201);
+        }
 
         return redirect('/watchlist');
     }

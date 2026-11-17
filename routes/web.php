@@ -50,3 +50,6 @@ Route::get('/cinemas/showtimes/{film}', [CinemaShowtimesController::class, 'show
     ->name('cinemas.showtimes');
 
 Route::view('/credits', 'credits')->name('credits.index');
+Route::get('/movies/{movie}/details', [\App\Http\Controllers\MovieDetailsController::class, 'show'])
+    ->whereNumber('movie')
+    ->name('movies.details');
